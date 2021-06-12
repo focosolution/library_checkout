@@ -21,6 +21,23 @@ class Checkout(models.Model):
         'checkout_id',
         string='Borrowed Books',)
 
+    @api.model
+    def _default_stage(self):
+        Stage = self.env['library.checkout.stage']
+        return Stage.search([], limit=1)
+
+    @api.model
+    def _group_expand_stage_id(self, stages, domain, order):
+        return stages.search([], order=order)
+
+    stage_id = fields.Many2one(
+        'library.checkout.stage',
+        default=_default_stage,
+        group_expand='_group_expand_stage_id',
+    )
+    state = fields.Selection(related='stage_id.state')
+
+
 class CheckoutLine(models.Model):
     _name = 'library.checkout.line'
     _description = 'Borrow Request Line'
